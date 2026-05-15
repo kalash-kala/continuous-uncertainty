@@ -1,0 +1,18 @@
+visualization:
+  create_attention_overlays: true
+  create_sequence_grids: true
+  create_trajectory_plots: true
+  create_aggregate_plots: true
+
+attention_overlay:
+  colormap: "jet"
+  alpha: 0.45
+  draw_patch_boundaries: true
+  normalize_per_frame: true
+  normalize_per_sequence: false
+
+sequence_grid:
+  mark_ambiguity_center: true
+  show_generated_answer: true
+  show_margin: true
+  show_binary_entropy: true

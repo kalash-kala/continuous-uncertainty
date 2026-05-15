@@ -1,0 +1,19 @@
+model:
+  name: "llava-hf/llava-1.5-7b-hf"
+  family: "llava"
+  device_map: "auto"
+  torch_dtype: "float16"
+  attn_implementation: "eager"
+  load_in_4bit: false
+  load_in_8bit: false
+
+generation:
+  max_new_tokens: 32
+  do_sample: false
+  temperature: 0.0
+  top_p: null
+  num_beams: 1
+
+prompt:
+  use_chat_template: true
+  fallback_template: "USER: <image>\n{question}\nASSISTANT:"

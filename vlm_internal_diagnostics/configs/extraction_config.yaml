@@ -1,0 +1,33 @@
+extraction:
+  save_vision_features: true
+  save_projector_features: true
+  save_hidden_states: true
+  save_attentions: true
+  save_logits: true
+
+hidden_states:
+  token_sources:
+    - final_prompt
+    - image_mean
+    - question_mean
+  layers: "all"
+  selected_layers: [0, 8, 16, 24, 31]
+
+attentions:
+  enabled: true
+  query_source: "question_mean"
+  key_source: "image_tokens"
+  layers: [8, 16, 24, 31]
+  aggregate_heads: "mean"
+  aggregate_layers: false
+  save_raw_attention: false
+  save_attention_heatmap: true
+
+logits:
+  compute_yes_no_margin: true
+  yes_variants: ["yes", "Yes", " yes", " Yes"]
+  no_variants: ["no", "No", " no", " No"]
+
+storage:
+  save_large_tensors: true
+  tensor_dtype: "float16"

@@ -1,0 +1,19 @@
+data:
+  manifest_path: "/home/kalashkala/acl_rebuttal_form/list_questions_revised.csv"
+  image_root: "/home/kalashkala/acl_rebuttal_form/images"
+  split: "test"
+  max_sequences: 20
+  frames_per_sequence: 10
+  categories:
+    - Geometric
+    - Semantic
+    - Compositional
+
+sequence:
+  id_column: "sequence_id"
+  frame_index_column: "frame_index"
+  image_path_column: "image_path"
+  question_column: "question"
+  category_column: "category"
+  max_ambiguity_column: "max_ambiguity_index"
+  ground_truth_column: "ground_truth"

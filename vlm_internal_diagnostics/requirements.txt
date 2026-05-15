@@ -1,0 +1,22 @@
+# Core dependencies for LLaVA Internal Diagnostics
+
+# PyTorch & vision
+torch==2.6.0
+torchvision==0.21.0
+transformers==4.51.1
+
+# Data handling & processing
+numpy==1.26.1
+pandas==2.3.3
+Pillow==10.2.0
+pyyaml==6.0.1
+
+# Metrics & math
+scipy==1.15.3
+scikit-learn==1.5.0
+
+# Visualization
+matplotlib==3.10.8
+
+# Model loading (required for device_map="auto")
+accelerate==1.13.0

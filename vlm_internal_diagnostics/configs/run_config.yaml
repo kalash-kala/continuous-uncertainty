@@ -1,0 +1,13 @@
+run:
+  run_name: "llava_internal_diag_v1_question_mean"
+  output_dir: "/data/kalashkala/continuous-uncertainty/outputs/llava_internal_diag_v1_question_mean"
+  seed: 42
+  overwrite: false
+  num_workers: 4
+  batch_size: 1
+  device: "cuda"
+
+debug:
+  enabled: false
+  limit_sequences: 3
+  limit_frames_per_sequence: 10
