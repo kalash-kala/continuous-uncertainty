@@ -4,3 +4,5 @@ from .attention_metrics import attention_entropy, attention_jump, attention_bloc
 from .logit_metrics import yes_no_margin, binary_entropy_from_logits, boundary_index, boundary_error, answer_flip_rate, logsumexp
 from .hidden_probe_metrics import train_layerwise_probe
 from .sequence_metrics import aggregate_sequence
+from .per_token_attention_metrics import compute_per_token_metrics
+from .representation_boundary_metrics import representation_boundary_block
