@@ -1,0 +1,348 @@
+
+PHASE 1 & 2: EXPECTED OUTPUTS AND EXAMPLE RESULTS
+==================================================
+ 
+This document shows what successful Phase 1 & 2 results should look like.
+ 
+═══════════════════════════════════════════════════════════════════════════════
+EXPECTED OUTPUT FILES
+═════════════════════════════════════════════════════════════════════════════════
+ 
+1. DETAILED CSV WITH ALL SEQUENCE-LEVEL RESULTS
+   Filename: phase1_phase2_results.csv
+   
+   Rows: 92 sequences × 3 stages × 4 models = 1104 rows
+   
+   Example rows:
+   
+   model,stage,sequence_id,category,center_idx,pc1_alignment_with_chord,pc1_monotonicity_violations,pc1_variance_ratio,decision_axis_monotonic,orthogonal_variance_center_spearman,nn_order_lis_ratio,mean_curvature_radians,curvature_peaks_near_center,effective_dim_95pct,compression_ratio_95,test1_pass,test2_pass,test3_pass,test4_pass,test5_pass
+   
+   llava,vision,seq_001,Geometric,5,0.78,0,0.62,True,-0.68,0.8,0.24,True,8,32,1,1,1,1,1
+   llava,vision,seq_002,Semantic,4,0.71,1,0.58,True,-0.45,0.6,0.18,False,12,21,1,0,0,0,1
+   llava,vision,seq_003,Compositional,6,0.82,0,0.71,True,-0.72,0.9,0.31,True,6,43,1,1,1,1,1
+   ...
+   phi4,projector,seq_089,Geometric,5,0.76,0,0.65,True,-0.58,0.75,0.22,True,9,28,1,1,1,1,1
+   phi4,projector,seq_090,Semantic,3,0.69,2,0.54,False,-0.35,0.5,0.12,False,15,17,0,0,0,0,1
+   ...
+   
+   Key columns:
+   - Test X_pass: 1 if sequence passed test X, 0 otherwise
+   - Use these to compute pass rates later
+ 
+═══════════════════════════════════════════════════════════════════════════════
+EXPECTED AGGREGATE STATISTICS
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Output file: phase1_phase2_summary_stats.txt
+ 
+Format: Print human-readable summary
+ 
+═══════════════════════════════════════════════════════════════════════════════
+ 
+Example output:
+ 
+PHASE 1 & 2 VALIDATION SUMMARY
+==============================
+ 
+Dataset: 92 sequences, 4 models, 3 stages each = 1104 total tests
+ 
+═══ STAGE: VISION ═══════════════════════════════════════════════════════════
+ 
+Test 1: PCA Alignment with Decision Axis
+  PC1 alignment > 0.7:              79/92 (85.9%) ✓
+  Monotonicity violations ≤ 1:      87/92 (94.6%) ✓
+  PC1 variance ratio > 0.5:         88/92 (95.7%) ✓
+  → Sequences passing ALL:          76/92 (82.6%) ✓✓✓
+  
+  Mean PC1 alignment: 0.747 ± 0.112
+  Mean PC1 variance ratio: 0.634 ± 0.089
+  Mean monotonicity violations: 0.13 ± 0.35
+ 
+Test 2: Orthogonal Variance Peak at Center
+  Decision axis monotonic:          85/92 (92.4%) ✓
+  Orthogonal variance Spearman < -0.5: 76/92 (82.6%) ✓
+  Peak at correct frame:            74/92 (80.4%) ✓
+  → Sequences passing ALL:          72/92 (78.3%) ✓✓
+  
+  Mean orthogonal variance center Spearman: -0.623 ± 0.186
+ 
+Test 3: Frame Order Recovery
+  LIS ratio > 0.5:                  65/92 (70.7%) ✓
+  LIS ratio > 0.7:                  52/92 (56.5%) ?
+  → Sequences passing (>0.5):       65/92 (70.7%) ✓
+  
+  Mean LIS ratio: 0.642 ± 0.189
+  Perfect matches (LIS=1.0):        8/92 (8.7%)
+ 
+Test 4: Trajectory Curvature
+  Mean curvature > 0.15 rad:        79/92 (85.9%) ✓
+  Curvature peaks near center:      71/92 (77.2%) ✓
+  Spearman < -0.3:                  69/92 (75.0%) ✓
+  → Sequences passing ALL:          65/92 (70.7%) ✓
+  
+  Mean curvature: 0.227 ± 0.112 radians (~13°)
+  Max curvature: 0.684 ± 0.221 radians (~39°)
+ 
+Test 5: Effective Dimensionality
+  Compression ratio > 10x:          82/92 (89.1%) ✓
+  Effective dim < 50:               88/92 (95.7%) ✓ (out of 512-768)
+  → Sequences passing ALL:          80/92 (87.0%) ✓✓✓
+  
+  Mean compression ratio: 18.4x ± 8.2x
+  Mean effective dim (95% var): 28.5 ± 14.3
+  Median effective dim: 26
+ 
+═══ STAGE: PROJECTOR ═════════════════════════════════════════════════════════
+ 
+Test 1: PCA Alignment with Decision Axis
+  Sequences passing ALL:            71/92 (77.2%) ✓
+  Mean PC1 alignment: 0.721 ± 0.124
+ 
+Test 2: Orthogonal Variance Peak at Center
+  Sequences passing ALL:            68/92 (73.9%) ✓
+  Mean orthogonal variance center Spearman: -0.584 ± 0.198
+ 
+Test 3: Frame Order Recovery
+  Sequences passing (>0.5 LIS):     62/92 (67.4%) ✓
+ 
+Test 4: Trajectory Curvature
+  Sequences passing ALL:            63/92 (68.5%) ✓
+  Mean curvature: 0.201 ± 0.098 radians
+ 
+Test 5: Effective Dimensionality
+  Sequences passing ALL:            85/92 (92.4%) ✓✓✓
+  Mean compression ratio: 21.3x ± 9.1x
+ 
+═══ STAGE: HIDDEN (BEST LAYER) ════════════════════════════════════════════════
+ 
+Test 1: PCA Alignment with Decision Axis
+  Sequences passing ALL:            85/92 (92.4%) ✓✓✓
+  Mean PC1 alignment: 0.794 ± 0.102
+ 
+Test 2: Orthogonal Variance Peak at Center
+  Sequences passing ALL:            81/92 (88.0%) ✓✓✓
+  Mean orthogonal variance center Spearman: -0.678 ± 0.168
+ 
+Test 3: Frame Order Recovery
+  Sequences passing (>0.5 LIS):     70/92 (76.1%) ✓
+ 
+Test 4: Trajectory Curvature
+  Sequences passing ALL:            77/92 (83.7%) ✓✓
+  Mean curvature: 0.243 ± 0.119 radians
+ 
+Test 5: Effective Dimensionality
+  Sequences passing ALL:            82/92 (89.1%) ✓✓✓
+  Mean compression ratio: 19.2x ± 8.7x
+ 
+═══════════════════════════════════════════════════════════════════════════════
+CROSS-MODEL COMPARISON
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Model: LLaVA-1.5-7B
+  Test 1 pass rate (all stages):    82.6%
+  Test 2 pass rate (all stages):    78.3%
+  Test 3 pass rate (all stages):    70.7%
+  Test 4 pass rate (all stages):    70.7%
+  Test 5 pass rate (all stages):    87.0%
+  
+  → 4/5 tests strongly pass ✓✓✓
+ 
+Model: Phi-4
+  Test 1 pass rate (all stages):    80.4%
+  Test 2 pass rate (all stages):    76.1%
+  Test 3 pass rate (all stages):    69.6%
+  Test 4 pass rate (all stages):    72.8%
+  Test 5 pass rate (all stages):    89.1%
+  
+  → 4/5 tests strongly pass ✓✓✓
+ 
+Model: Qwen-2.5-VL
+  Test 1 pass rate (all stages):    78.3%
+  Test 2 pass rate (all stages):    74.5%
+  Test 3 pass rate (all stages):    65.2%
+  Test 4 pass rate (all stages):    71.7%
+  Test 5 pass rate (all stages):    88.0%
+  
+  → 3/5 tests strongly pass, but lower than others
+ 
+Model: Pixtral-12B
+  Test 1 pass rate (all stages):    81.5%
+  Test 2 pass rate (all stages):    77.2%
+  Test 3 pass rate (all stages):    68.5%
+  Test 4 pass rate (all stages):    73.9%
+  Test 5 pass rate (all stages):    86.9%
+  
+  → 4/5 tests strongly pass ✓✓✓
+ 
+═══════════════════════════════════════════════════════════════════════════════
+BREAKDOWN BY CATEGORY
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Category: GEOMETRIC (35 sequences, all 3 stages = 105 tests)
+  Test 1 pass rate: 86.7% ✓✓
+  Test 2 pass rate: 80.0% ✓✓
+  Test 3 pass rate: 71.4% ✓
+  Test 4 pass rate: 74.3% ✓
+  Test 5 pass rate: 88.6% ✓✓✓
+ 
+Category: SEMANTIC (45 sequences, all 3 stages = 135 tests)
+  Test 1 pass rate: 81.5% ✓✓
+  Test 2 pass rate: 76.3% ✓
+  Test 3 pass rate: 68.1% ✓
+  Test 4 pass rate: 71.1% ✓
+  Test 5 pass rate: 87.4% ✓✓✓
+ 
+Category: COMPOSITIONAL (12 sequences, all 3 stages = 36 tests)
+  Test 1 pass rate: 75.0% ✓
+  Test 2 pass rate: 72.2% ✓
+  Test 3 pass rate: 63.9% (borderline)
+  Test 4 pass rate: 69.4% ✓
+  Test 5 pass rate: 86.1% ✓✓
+ 
+  Note: Lower counts in this category; results should be interpreted carefully
+ 
+═══════════════════════════════════════════════════════════════════════════════
+VALIDATION DECISION
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Hypothesis: Representations encode ambiguity through orthogonal structure
+            (decision axis + orthogonal uncertainty subspace)
+ 
+Evidence:
+ 
+Test 1 (PC1 alignment):
+  ✓ PASS across all stages (81.5% average)
+  ✓ PC1 aligns with decision axis (mean cos = 0.75)
+  → Supports: Decision axis is discoverable via PCA
+ 
+Test 2 (Orthogonal variance):
+  ✓ PASS across all stages (76.1% average)
+  ✓ Orthogonal component shows inverted-U shape (mean Spearman = -0.63)
+  → Supports: Uncertainty manifests orthogonal to decision axis
+ 
+Test 3 (Frame order):
+  ? MARGINAL (69% average)
+  ⚠ Not all sequences have clean manifold structure
+  → Partial support: Most sequences have exploitable order, but not all
+ 
+Test 4 (Curvature):
+  ✓ PASS across all stages (72.8% average)
+  ✓ Curvature concentrated near center (mean = 0.22 rad ~13°)
+  → Supports: Trajectory deviates from chord at ambiguity point
+ 
+Test 5 (Dimensionality):
+  ✓ PASS across all stages (88.2% average)
+  ✓ Compression ratio ~20x (d=512-768 → effective ~25-30)
+  → Supports: Low-dimensional manifold structure exists
+ 
+═══════════════════════════════════════════════════════════════════════════════
+ 
+OVERALL VALIDATION RESULT: ✓✓✓ STRONG SUPPORT
+ 
+  ✓ 4 out of 5 tests STRONGLY PASS (>70% across all models)
+  ✓ Test 3 MARGINALLY PASSES (66-70%)
+  ✓ Structure consistent across all 4 models
+  ✓ Slightly stronger in HIDDEN stages, weaker in PROJECTOR
+  ✓ Categories show similar patterns (no major outliers)
+ 
+CONCLUSION:
+ 
+The orthogonal encoding hypothesis is STRONGLY VALIDATED. Representations
+genuinely encode:
+  1. Decision direction (what answer should I give?) → PC1, decision axis
+  2. Uncertainty (how confident?) → orthogonal subspace, peaks at center
+  
+The geometric structure that the Chord/Anchor Product methods exploit IS REAL.
+ 
+═══════════════════════════════════════════════════════════════════════════════
+RECOMMENDED NEXT STEPS (PHASE 3)
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Based on Phase 2 results:
+ 
+✓ IMPLEMENT METHOD G1 (Curvature-weighted):
+  Rationale: Test 4 shows curvature reliably peaks at center
+  Expected improvement: +5-10% exact matches
+ 
+✓ IMPLEMENT METHOD G2 (Orthogonal variance peak):
+  Rationale: Test 2 shows orthogonal variance encoded cleanly
+  Expected improvement: +10-15% exact matches
+ 
+✓ IMPLEMENT METHOD G3 (Geodesic/Isomap):
+  Rationale: Test 5 shows 20x dimensionality reduction possible
+  Expected improvement: +3-8% exact matches
+ 
+? CONSIDER METHOD G4 (Density anomaly):
+  Rationale: Not explicitly tested, but compatible with manifold structure
+  Expected improvement: +5-10% exact matches
+ 
+? SKIP METHOD G5 (Symmetry breaking):
+  Rationale: Doesn't match any Phase 2 findings
+  Recommendation: Only if time permits as robustness check
+ 
+═══════════════════════════════════════════════════════════════════════════════
+KEY FINDINGS FOR PAPER
+═════════════════════════════════════════════════════════════════════════════════
+ 
+Finding 1: Decision Axis is Principal Component
+  - PC1 aligns with chord direction (cos = 0.75 ± 0.11)
+  - Explains ~63% of variance on average
+  - Implies model learns structured representation of the task
+ 
+Finding 2: Orthogonal Encoding of Uncertainty
+  - Orthogonal subspace variance peaks at ambiguous frame
+  - Spearman correlation: ρ = -0.63 ± 0.18 (strongly peaks at center)
+  - Suggests model learned to encode "confidence" separately from "decision"
+ 
+Finding 3: Low-Dimensional Manifold
+  - ~20x compression from original to effective dimensionality
+  - 25-30 dimensions (vs 512-768 original) capture 95% variance
+  - Implies 10-frame sequences trace smooth 25-30D curve through space
+  
+Finding 4: Curvature Concentration
+  - Trajectory curvature ~13° on average (not straight)
+  - Highest curvature within 1.5 frames of center in 70% of sequences
+  - Explains why perpendicular distance method works
+ 
+Finding 5: Cross-Architecture Consistency
+  - All 4 models (LLaVA, Phi-4, Qwen, Pixtral) show similar structure
+  - Differences exist but pattern holds universally
+  - Suggests this is fundamental property of how LVLMs work, not artifact
+ 
+═══════════════════════════════════════════════════════════════════════════════
+OPTIONAL VISUALIZATIONS TO GENERATE
+═════════════════════════════════════════════════════════════════════════════════
+ 
+1. HEATMAP: Pass rates (tests × stages × models)
+   - Rows: 5 tests
+   - Cols: 4 models × 3 stages = 12 cells
+   - Color: % pass rate (green=high, red=low)
+   - Shows at a glance where structure is strongest
+ 
+2. HISTOGRAM: PC1 alignment across all sequences
+   - X: cos(angle) from 0 to 1
+   - Y: count
+   - Vertical line at 0.7 threshold
+   - Shows most are well-above threshold
+ 
+3. HISTOGRAM: Orthogonal variance Spearman ρ
+   - X: ρ from -1 to 1
+   - Y: count
+   - Vertical line at -0.5 threshold
+   - Shows strong negative correlation (peaks at center)
+ 
+4. SCATTER: Curvature vs distance from center
+   - X: distance from center frame (0 to 5)
+   - Y: local curvature (0 to max)
+   - Points: each edge in each sequence
+   - Trend should be: high curvature when X is small
+ 
+5. EXAMPLE SEQUENCE VISUALIZATION:
+   - Subplot 1: PC1 vs PC2 (first two PCs)
+     Show 10 points (frames), with frames 0/9 at edges, center in middle
+   - Subplot 2: Orthogonal variance curve
+     Show inverted-U shape with peak at center
+   - Subplot 3: Curvature profile
+     Show where curvature peaks relative to center
+ 
+═══════════════════════════════════════════════════════════════════════════════
