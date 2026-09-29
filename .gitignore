@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ── Project-specific ────────────────────────────────────────────────────────
+# Symlink to the outputs volume on the lab server; machine-specific.
+# Configure outputs_root in vlm_internal_diagnostics/configs/paths.yaml instead.
+/continuous-uncertainty
+
+# Your filled-in copy of configs/paths.yaml (paths.yaml itself ships empty).
+vlm_internal_diagnostics/configs/paths.local.yaml
+
+# Extraction artifacts — features/ alone is ~1.7 GB per model.
+outputs/
+**/features/
+*.pt
