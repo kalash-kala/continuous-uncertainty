@@ -1,0 +1,38 @@
+# Model preset: Pixtral-12B
+#
+# Use with:
+#   python run_extract.py --model_config ../configs/models/pixtral.yaml \
+#                         --run_config   ../configs/run_config.yaml \
+#                         --data_config  ../configs/data_config.yaml \
+#                         --extraction_config ../configs/extraction_config.yaml
+#
+# IMPORTANT: also set `run_name: "pixtral_internal_diag_v1_question_mean_new"` in run_config.yaml before
+# running, so this model writes to its own output directory. The analysis
+# phases look for exactly that directory name (see MODELS in
+# scripts/phase_1_2_analysis.py).
+#
+# 1024px input, up to ~4096 image patches - the heaviest of the four.
+# Largest VRAM footprint; consider load_in_4bit if you are tight.
+
+model:
+  name: "mistral-community/pixtral-12b"
+  family: "pixtral"
+  device_map: "auto"
+  torch_dtype: "float16"
+  # Adapters force attn_implementation="eager" internally (required for
+  # output_attentions=True; SDPA/FlashAttention return no attention weights).
+  # The value here is a default only.
+  attn_implementation: "eager"
+  load_in_4bit: false
+  load_in_8bit: false
+
+generation:
+  max_new_tokens: 32
+  do_sample: false
+  temperature: 0.0
+  top_p: null
+  num_beams: 1
+
+prompt:
+  use_chat_template: true
+  fallback_template: "USER: <image>\n{question}\nASSISTANT:"

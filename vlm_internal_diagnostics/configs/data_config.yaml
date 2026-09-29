@@ -1,8 +1,16 @@
 data:
-  manifest_path: "/home/kalashkala/acl_rebuttal_form/list_questions_revised.csv"
-  image_root: "/home/kalashkala/acl_rebuttal_form/images"
+  # FILL THESE IN. Both are machine-specific; see configs/paths.yaml for what
+  # they are and where the canonical copies live on the lab server, or set the
+  # CU_MANIFEST_PATH / CU_IMAGE_ROOT env vars and leave these empty.
+  #
+  #   manifest_path -> the sequence manifest CSV (one row per 10-frame sequence)
+  #   image_root    -> <image_root>/<sequence_id>/frame_XXXX.png
+  #
+  # Run `python scripts/_paths.py` to check your configuration.
+  manifest_path: ""
+  image_root: ""
   split: "test"
-  max_sequences: 20
+  max_sequences: 100
   frames_per_sequence: 10
   categories:
     - Geometric

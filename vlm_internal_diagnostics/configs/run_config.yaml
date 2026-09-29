@@ -1,13 +1,32 @@
+# Per-run settings. ONE run = ONE model.
+#
+# To reproduce all four models you run the pipeline four times, each time
+# pairing a model preset from configs/models/ with the matching `run_name`
+# below. The run_name IS the output directory name, and the analysis phases
+# look those names up verbatim (see MODELS in scripts/phase_1_2_analysis.py) —
+# so use exactly these:
+#
+#   configs/models/llava.yaml            -> llava_internal_diag_v1_question_mean_new
+#   configs/models/phi4_multimodal.yaml  -> phi4_internal_diag_v1_question_mean_new
+#   configs/models/pixtral.yaml          -> pixtral_internal_diag_v1_question_mean_new
+#   configs/models/qwen2_5_vl.yaml       -> qwen2_5_vl_internal_diag_v1_question_mean_new
+#
+# `output_dir` is left EMPTY on purpose: when empty it resolves to
+# <outputs_root>/<run_name>, with outputs_root coming from configs/paths.yaml
+# (or CU_OUTPUTS_ROOT). Set it explicitly only to override that for one run.
+
 run:
-  run_name: "llava_internal_diag_v1_question_mean"
-  output_dir: "/data/kalashkala/continuous-uncertainty/outputs/llava_internal_diag_v1_question_mean"
+  run_name: "llava_internal_diag_v1_question_mean_new"
+  output_dir: ""
   seed: 42
-  overwrite: false
-  num_workers: 4
+  overwrite: true
+  num_workers: 8
   batch_size: 1
   device: "cuda"
 
 debug:
+  # Turn this on for a smoke test before committing a GPU to a full run:
+  # 3 sequences instead of 92, same code path end to end.
   enabled: false
   limit_sequences: 3
   limit_frames_per_sequence: 10

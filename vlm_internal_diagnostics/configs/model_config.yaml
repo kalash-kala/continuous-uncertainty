@@ -1,8 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DEPRECATED — prefer the per-model presets in configs/models/
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# This file used to be hand-edited between runs to switch models, which made
+# runs non-reproducible (you could not tell from the repo which model produced
+# which output directory). It is kept only so existing commands do not break,
+# and currently mirrors configs/models/llava.yaml.
+#
+# Use instead:
+#   --model_config ../configs/models/llava.yaml            (or qwen2_5_vl /
+#                                                            phi4_multimodal /
+#                                                            pixtral)
+# and set the matching `run_name` in run_config.yaml. Each preset states which
+# run_name it pairs with.
+#
+# Supported families (registry: models/adapters/__init__.py):
+#   llava            -> llava-hf/llava-1.5-7b-hf              (336px,  576 patches)
+#   qwen2_5_vl       -> Qwen/Qwen2.5-VL-7B-Instruct           (448px, 1024 patches)
+#   phi4_multimodal  -> microsoft/Phi-4-multimodal-instruct   (448px, 1024 patches)
+#   pixtral          -> mistral-community/pixtral-12b        (1024px, 4096 patches)
+
 model:
   name: "llava-hf/llava-1.5-7b-hf"
   family: "llava"
   device_map: "auto"
   torch_dtype: "float16"
+  # Adapters force attn_implementation="eager" internally (required for
+  # output_attentions=True). The value here is a default only.
   attn_implementation: "eager"
   load_in_4bit: false
   load_in_8bit: false

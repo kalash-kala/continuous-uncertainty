@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MACHINE-LOCAL PATHS — FILL THESE IN BEFORE RUNNING ANYTHING
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Every value below is intentionally EMPTY. Nothing in this repo will run until
+# you fill them in. They are the only machine-specific paths in the codebase;
+# all other configs derive from these.
+#
+# Each key can also be overridden by an environment variable (env var wins over
+# this file), which is handy for one-off runs:
+#
+#     CU_OUTPUTS_ROOT=/scratch/me/outputs python scripts/phase_1_2_analysis.py
+#
+# This file is committed with empty values on purpose. Fill it in locally and
+# do NOT commit your filled-in version (it is listed in .gitignore as
+# `configs/paths.local.yaml` — copy this file to that name if you prefer to
+# keep your values out of `git status`; the loader reads paths.local.yaml first
+# if it exists).
+# ─────────────────────────────────────────────────────────────────────────────
+
+paths:
+
+  # ── 1. outputs_root ────────────────────────────────────────────────────────
+  # Where extraction writes and where all analysis reads from.
+  # Expects (or will create) this layout underneath:
+  #
+  #   <outputs_root>/
+  #     llava_internal_diag_v1_question_mean_new/
+  #       aggregate_metrics.csv
+  #       per_frame_outputs.jsonl
+  #       per_sequence_summary.jsonl
+  #       features/<sequence_id>/frame_XX_{vision,projected,hidden,...}.pt
+  #     phi4_internal_diag_v1_question_mean_new/     (same layout)
+  #     pixtral_internal_diag_v1_question_mean_new/  (same layout)
+  #     qwen2_5_vl_internal_diag_v1_question_mean_new/ (same layout)
+  #     phase_1_2/  phase_3/  phase_4/               (written by analysis)
+  #
+  # Budget ~1.7 GB of `features/` PER MODEL (~7 GB for all four). Put this on a
+  # data volume, not in the repo.
+  #
+  # Env var: CU_OUTPUTS_ROOT
+  #
+  # Canonical copy on the lab server (rsync from here rather than re-extracting
+  # — extraction needs 4 GPUs-worth of model loads and many hours):
+  #   /data/kalashkala/continuous-uncertainty/outputs
+  outputs_root: ""
+
+  # ── 2. manifest_path ───────────────────────────────────────────────────────
+  # The sequence manifest CSV. One row per 10-frame sequence, carrying
+  # `video_path`, `question`, `category`, `max_ambiguity_index` / `center_frames`
+  # and `gt_answer`. Phase 4 reads the transition structure from here to rebuild
+  # per-frame correctness labels.
+  #
+  # Env var: CU_MANIFEST_PATH
+  #
+  # Canonical copy on the lab server:
+  #   /home/kalashkala/acl_rebuttal_form/list_questions_revised.csv
+  manifest_path: ""
+
+  # ── 3. image_root ──────────────────────────────────────────────────────────
+  # Root of the extracted frames. Layout:
+  #   <image_root>/<sequence_id>/frame_XXXX.png
+  # where sequence_id is derived from the manifest's `video_path` by
+  # replacing "/" with "_" and stripping ".mp4".
+  # Only needed for EXTRACTION; the analysis phases read saved tensors instead.
+  #
+  # Env var: CU_IMAGE_ROOT
+  #
+  # Canonical copy on the lab server:
+  #   /home/kalashkala/acl_rebuttal_form/images
+  image_root: ""
+
+  # ── 4. semantic_uncertainty_utils ──────────────────────────────────────────
+  # Directory containing `eval_utils.py` from the semantic_uncertainty repo.
+  # Phase 4 imports its AUROC + bootstrap-CI implementation directly so our
+  # numbers are computed by the exact same function as the semantic-entropy
+  # baselines we compare against (deliberate: do not reimplement it).
+  #
+  # Source repo: https://github.com/jlko/semantic_uncertainty
+  # After cloning, this path is:
+  #   <clone>/semantic_uncertainty/uncertainty/utils
+  #
+  # Only Phase 4 needs this. Phases 1-3 run without it.
+  #
+  # Env var: CU_SEMUNC_UTILS
+  #
+  # Canonical copy on the lab server:
+  #   /home/kalashkala/semantic_uncertainty/semantic_uncertainty/uncertainty/utils
+  semantic_uncertainty_utils: ""

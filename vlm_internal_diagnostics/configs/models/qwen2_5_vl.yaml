@@ -1,0 +1,37 @@
+# Model preset: Qwen2.5-VL-7B-Instruct
+#
+# Use with:
+#   python run_extract.py --model_config ../configs/models/qwen2_5_vl.yaml \
+#                         --run_config   ../configs/run_config.yaml \
+#                         --data_config  ../configs/data_config.yaml \
+#                         --extraction_config ../configs/extraction_config.yaml
+#
+# IMPORTANT: also set `run_name: "qwen2_5_vl_internal_diag_v1_question_mean_new"` in run_config.yaml before
+# running, so this model writes to its own output directory. The analysis
+# phases look for exactly that directory name (see MODELS in
+# scripts/phase_1_2_analysis.py).
+#
+# 448px input, ~1024 image patches. Needs a recent transformers.
+
+model:
+  name: "Qwen/Qwen2.5-VL-7B-Instruct"
+  family: "qwen2_5_vl"
+  device_map: "auto"
+  torch_dtype: "float16"
+  # Adapters force attn_implementation="eager" internally (required for
+  # output_attentions=True; SDPA/FlashAttention return no attention weights).
+  # The value here is a default only.
+  attn_implementation: "eager"
+  load_in_4bit: false
+  load_in_8bit: false
+
+generation:
+  max_new_tokens: 32
+  do_sample: false
+  temperature: 0.0
+  top_p: null
+  num_beams: 1
+
+prompt:
+  use_chat_template: true
+  fallback_template: "USER: <image>\n{question}\nASSISTANT:"
