@@ -4,7 +4,7 @@ from pathlib import Path
 
 from _common import load_all_configs, resolve_output_dir
 from vlm_internal_diagnostics.data import SequenceDataset
-from vlm_internal_diagnostics.models import load_llava
+from vlm_internal_diagnostics.models import get_adapter
 from vlm_internal_diagnostics.extraction import extract_all
 
 
@@ -35,10 +35,14 @@ def main():
     sequences = list(ds)
     print(f"[extract] {len(sequences)} sequences loaded")
 
-    model, processor = load_llava(cfgs["model"])
+    family = cfgs["model"].get("family", "llava")
+    adapter = get_adapter(family)
+    print(f"[extract] using adapter family='{family}' "
+          f"(input={adapter.fixed_input_size}, patches={adapter.expected_num_patches})")
+    model, processor = adapter.load(cfgs["model"])
     extract_all(model, processor, sequences,
                 {"model": cfgs["model"], "extraction": cfgs["extraction"], "run": cfgs["run"]},
-                out_dir)
+                out_dir, adapter=adapter)
     print(f"[extract] wrote {out_dir}/per_frame_outputs.jsonl")
 
 

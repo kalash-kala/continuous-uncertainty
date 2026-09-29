@@ -20,3 +20,20 @@ matplotlib==3.10.8
 
 # Model loading (required for device_map="auto")
 accelerate==1.13.0
+
+# NLP for token selection (POS tagging, stop words)
+# After install: python -m spacy download en_core_web_sm
+spacy==3.7.2
+
+# Required by Qwen2.5-VL processor (smart_resize, vision_process helpers).
+# Only needed when running the qwen2_5_vl adapter.
+qwen-vl-utils
+
+# Phi-4-multimodal-instruct ships custom Python in the model repo; loading
+# requires trust_remote_code=True. Some versions of the remote code import
+# these packages — install if you plan to run that adapter.
+# soundfile  # only needed if processing audio
+# scipy already pinned above
+# einops
+einops
+sentencepiece

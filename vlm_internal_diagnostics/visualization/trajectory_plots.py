@@ -9,19 +9,28 @@ def render_trajectory_plot(seq_records, out_path):
     margins = [r.get("logit_margin_yes_no", float("nan")) for r in seq_records]
     bin_ent = [r.get("binary_entropy", float("nan")) for r in seq_records]
     max_idx = seq_records[0].get("max_ambiguity_index")
-    attn_ent_first = []
+
+    # Extract per-layer attention entropy
+    attn_ent_by_layer = {}
     for r in seq_records:
         a = r.get("attention_entropy", {})
-        if a:
-            attn_ent_first.append(list(a.values())[0])
-        else:
-            attn_ent_first.append(float("nan"))
+        for layer_key, ent_val in a.items():
+            if layer_key not in attn_ent_by_layer:
+                attn_ent_by_layer[layer_key] = []
+            attn_ent_by_layer[layer_key].append(ent_val)
 
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
     axes[0, 0].plot(fi, margins, "-o"); axes[0, 0].set_title("yes/no margin")
     axes[0, 0].axhline(0, color="gray", linestyle="--", lw=0.5)
     axes[0, 1].plot(fi, bin_ent, "-o", color="orange"); axes[0, 1].set_title("binary entropy")
-    axes[1, 0].plot(fi, attn_ent_first, "-o", color="green"); axes[1, 0].set_title("attention entropy")
+
+    # Plot all layers on the same attention entropy subplot
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]  # blue, orange, green, red
+    for i, (layer_key, values) in enumerate(sorted(attn_ent_by_layer.items())):
+        axes[1, 0].plot(fi, values, "-o", label=layer_key, color=colors[i % len(colors)])
+    axes[1, 0].set_title("attention entropy (per layer)")
+    axes[1, 0].legend(fontsize=8, loc="best")
+
     axes[1, 1].plot(fi, [abs(i - max_idx) for i in fi], "-o", color="purple")
     axes[1, 1].set_title("ambiguity distance")
     for ax in axes.ravel():

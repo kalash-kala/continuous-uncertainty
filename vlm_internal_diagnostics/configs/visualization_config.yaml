@@ -1,5 +1,8 @@
 visualization:
-  create_attention_overlays: true
+  # Per-frame attention_overlays are disabled — sequence_grids show the same info
+  # and per_token_attention provides finer-grained views. Re-enable by uncommenting
+  # the block in scripts/run_visualize.py.
+  create_attention_overlays: false
   create_sequence_grids: true
   create_trajectory_plots: true
   create_aggregate_plots: true
@@ -16,3 +19,19 @@ sequence_grid:
   show_generated_answer: true
   show_margin: true
   show_binary_entropy: true
+  # Add this many extra rows below the original 3 — each shows per-token attention
+  # for one of the top-K selected tokens (selection driven by per_token_attention below).
+  show_top_k_tokens: 3
+
+per_token_attention:
+  enabled: true
+  selection_strategy: "stopwords" # "stopwords" | "pos" | "strategy_d"
+  top_k: 5
+  pos_tags_to_keep: ["NOUN", "PROPN", "VERB", "ADJ", "ADV"]
+  layer: null # null => average all saved layers; or e.g. 16
+
+diagnostic_maps:
+  temporal_variance: true
+  center_vs_clear: true
+  head_specialization: true
+  num_farthest_frames: 4

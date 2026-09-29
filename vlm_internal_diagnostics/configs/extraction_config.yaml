@@ -22,6 +22,11 @@ attentions:
   aggregate_layers: false
   save_raw_attention: false
   save_attention_heatmap: true
+  # Per-question-token attention (new): preserves full [T x P] matrix per layer
+  # plus per-head summary stats for head-specialization analysis.
+  save_per_token_attention: true
+  per_token_layers: [8, 16, 24, 31]
+  per_token_head_aggregation: "mean"
 
 logits:
   compute_yes_no_margin: true

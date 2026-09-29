@@ -37,7 +37,8 @@ def main():
          "--run_config", args.run_config])
 
     run([python, str(scripts_dir / "run_metrics.py"),
-         "--run_dir", out_dir])
+         "--run_dir", out_dir,
+         "--visualization_config", args.visualization_config])
 
     run([python, str(scripts_dir / "run_visualize.py"),
          "--run_dir", out_dir,
