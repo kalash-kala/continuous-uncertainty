@@ -262,7 +262,7 @@ Title shows: frame index, parsed answer, yes/no margin, binary entropy.
 |---|---|---|
 | Top-left | `logit_margin_yes_no` | Should cross **0** at the red line. Gray dashed horizontal = zero margin. |
 | Top-right | `binary_entropy` | Should **peak** at the red line. |
-| Bottom-left | First-layer `attention_entropy` (from the per-frame dict) | Higher = more diffuse attention. |
+| Bottom-left | Per-layer `attention_entropy` (all 4 layers: 8, 16, 24, 31) | Higher = more diffuse attention. Compare layer specialization: early vs late layers may show different entropy patterns. |
 | Bottom-right | $d_i = \lvert i - c \rvert$ | The ground-truth V-shape — reference for what an "ideal" ambiguity-tracking curve looks like. |
 
 ### 5.4 Aggregate plots — `figures/aggregate/`
@@ -293,10 +293,106 @@ These summarize across **all sequences** in the run.
 
 ---
 
+## 8. Per-question-token attention (fine-grained diagnostic)
+
+The metrics in Section 2 collapse all question tokens into a single attention map (either via `final_prompt` or `question_mean`). That hides which **word** in the question is grounding where in the image. The per-token pipeline preserves the full `[num_question_tokens × num_image_patches]` attention matrix per layer (head-averaged) and computes token-level metrics on top of it.
+
+### 8.1 Token selection
+
+Three strategies, configurable in `visualization_config.yaml → per_token_attention.selection_strategy`:
+
+| Strategy | Meaning |
+|---|---|
+| `stopwords` | spaCy stop-word + punctuation filter only. |
+| `pos` | Keep tokens whose spaCy POS is in `pos_tags_to_keep` (default: NOUN, PROPN, VERB, ADJ, ADV). |
+| `strategy_d` | Rank tokens by **image-attention mass + temporal variance − attention entropy**, take top-k. Picks tokens whose attention is image-grounded, varies across frames, and is concentrated. Default. |
+
+`top_k` (default 5) caps the number of selected tokens per sequence.
+
+### 8.2 Per-token metrics
+
+Computed for each selected token `t`. Notation: $a_i^{(t)}$ = head-averaged attention from question token `t` to image patches at frame `i`, shape $[P]$.
+
+| Metric | Formula | What it tells you |
+|---|---|---|
+| `attention_entropy_per_frame` | $H(a_i^{(t)})$ for each frame | How diffused this token's attention is. |
+| `adjacent_jumps` | $1 - \cos(a_i^{(t)}, a_{i+1}^{(t)})$ | Frame-to-frame instability of this token's grounding. |
+| `center_distance_spearman` | $\rho\bigl(1-\cos(a_i^{(t)}, a_c^{(t)}),\ \lvert i-c\rvert\bigr)$ | Does this token's attention smoothly diverge from the center frame's pattern as ambiguity grows? |
+| `temporal_variance` | $\overline{\mathrm{Var}_i\bigl(a_i^{(t)}[p]\bigr)}$ over patches $p$ | How much this token's attention "moves around" across frames. |
+| `center_vs_clear_diff_norm` | $\bigl\|\,a_c^{(t)} - \overline{a_{\text{far}}^{(t)}}\,\bigr\|_2$ | L2 distance between attention at center vs the mean of the top-`num_farthest_frames` farthest frames. |
+
+### 8.3 Aggregate (sequence-level CSV)
+
+Mean across selected tokens:
+
+- `mean_attention_entropy_content_tokens`
+- `mean_attention_jump_content_tokens`
+- `mean_center_distance_spearman_content_tokens`
+- `mean_temporal_variance_content_tokens`
+- `mean_center_vs_clear_diff_content_tokens`
+
+### 8.4 Detailed (per-sequence JSONL)
+
+`per_token_attention_metrics.selected_tokens[]` contains the full per-token breakdown, including `head_specialization` (Section 9).
+
+---
+
+## 9. Head specialization (does averaging hide structure?)
+
+Attention is averaged across heads for visualization, but heads may behave differently. These metrics detect whether averaging is hiding specialization.
+
+Computed per selected token, per layer:
+
+| Metric | Formula | What it tells you |
+|---|---|---|
+| `entropy_spread_by_layer` | $\sigma_{h}\bigl(H_h^{(t,l)}\bigr)$ | Variance across heads of per-head attention entropy. Large = some heads focus, others diffuse. |
+| `image_mass_spread_by_layer` | $\sigma_{h}\bigl(\sum_p a_{h}^{(t,l)}[p]\bigr)$ | Variance across heads of total attention mass on image patches. Large = some heads ground on the image, others ignore it. |
+| `top1_concentration_spread_by_layer` | $\sigma_{h}\bigl(\max_p a_{h}^{(t,l)}[p]\bigr)$ | Variance across heads of top-1 patch weight. |
+| `top_head_vs_mean_divergence_by_layer` | $\frac{\lvert\,\max_p a_{\text{best}}^{(t,l)}[p] - \overline{\max_p a_h^{(t,l)}[p]}\,\rvert}{\overline{\max_p a_h^{(t,l)}[p]} + \varepsilon}$ | How much the most image-focused head's concentration deviates from the head-averaged concentration. Large = averaging washes out a specialist head. |
+| `best_image_mass_head_by_layer` | $\arg\max_h \sum_p a_h^{(t,l)}[p]$ | Which head puts most attention on the image. |
+| `js_divergence_by_layer` | (reserved) | Pairwise JS divergence across heads — requires the full per-head $[H, P]$ matrices, which we don't save by default. Reported as `null`. |
+
+### 9.1 Aggregate (sequence-level CSV)
+
+- `mean_head_entropy_spread_content_tokens`
+- `mean_head_image_mass_spread_content_tokens`
+- `mean_top_head_vs_mean_divergence_content_tokens`
+
+### 9.2 How to read it
+
+- **All spreads ≈ 0** → heads are redundant → averaging is safe, no specialization.
+- **High `entropy_spread` + high `top_head_vs_mean_divergence`** → averaging is hiding a specialist head; consider analyzing that head individually.
+- **High `image_mass_spread`** → only some heads attend to the image at all; the head-averaged map dilutes them.
+
+---
+
+## 10. Per-token plots
+
+### 10.1 `figures/per_token_attention/{sequence_id}/frame_XX.png`
+One row × K columns. Each subplot is the same frame with the attention for one selected token overlaid. Title shows token text and POS tag.
+
+### 10.2 `figures/sequence_grids/{seq_id}.png` (extended)
+Now has $3 + K$ rows (default $K=3$):
+- Rows 1–3: thumbnail / head-averaged attention / answer text (unchanged).
+- Rows 4–$3+K$: per-token attention overlays for the top-K selected tokens (one row per token).
+
+### 10.3 `figures/temporal_variance/{seq_id}.png`
+Per-patch variance across frames, averaged over selected tokens, overlaid on the center frame. Hot regions = patches where attention shifts a lot frame-to-frame.
+
+### 10.4 `figures/center_vs_clear/{seq_id}.png`
+Difference map: `attention(center_frame) − mean(attention at top-`num_farthest_frames` farthest frames)`, averaged across selected tokens. Symmetric seismic colormap: **red** = patches the model attends *more* at the ambiguous center; **blue** = patches it attends *less* at the center.
+
+### 10.5 `figures/head_specialization/{seq_id}.png`
+One subplot per selected token. Heatmap: rows = heads, cols = saved layers, color = per-head attention entropy averaged over frames. Lets you eyeball whether some heads behave differently from others.
+
+---
+
 ## 7. Caveats
 
 - **Attention ≠ reasoning.** Report attention findings as *grounding diagnostics*, not causal explanations.
 - **Softmax attention is relative.** A high weight on one patch means high *routing weight*, not absolute importance.
 - **Spearman on 10 points is noisy.** Treat per-sequence $\rho$ values cautiously; trends across the full dataset are more reliable.
 - **Best layer is run-dependent.** "Best" = highest center-distance Spearman within that sequence. Aggregate across sequences to find the population-level best layer.
+- **Per-token attention alignment is best-effort.** LLaVA's SentencePiece pieces don't always cleanly align to spaCy words. Tokens we can't align fall back to `pos=None` and may be filtered by stop-word / POS strategies.
+- **Head specialization metrics here are surrogates.** We compute spreads of per-head summary stats (entropy/mass/top1) but do not save the full per-head $[H, P]$ matrices. Full JS-divergence requires re-running extraction with per-head saving enabled.
 - Stronger causal claims require **intervention experiments** (patch masking, activation patching) — not part of this pipeline.
