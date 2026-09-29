@@ -3,6 +3,7 @@ import numpy as np
 from .smoothness_metrics import smoothness_block, ambiguity_spearman
 from .attention_metrics import attention_block
 from .logit_metrics import boundary_index, boundary_error, answer_flip_rate
+from .representation_boundary_metrics import representation_boundary_block
 
 
 def accuracy(parsed_answers, ground_truths):
@@ -41,6 +42,9 @@ def aggregate_sequence(frame_records,
             "vision_path_length": sb["path_length"],
             "vision_center_distance_spearman": sb["center_distance_spearman"],
         })
+        rb = representation_boundary_block(vision_feats, center_index)
+        for k, v in rb.items():
+            out[f"vision_{k}"] = v
 
     if projector_feats is not None and len(projector_feats) >= 2:
         sb = smoothness_block(projector_feats, frame_indices, center_index)
@@ -50,6 +54,9 @@ def aggregate_sequence(frame_records,
             "projector_path_length": sb["path_length"],
             "projector_center_distance_spearman": sb["center_distance_spearman"],
         })
+        rb = representation_boundary_block(projector_feats, center_index)
+        for k, v in rb.items():
+            out[f"projector_{k}"] = v
         if "mean_vision_adjacent_jump" in out:
             out["smoothness_drop_projector_minus_vision"] = (
                 out["mean_projector_adjacent_jump"] - out["mean_vision_adjacent_jump"]
@@ -72,6 +79,9 @@ def aggregate_sequence(frame_records,
             out["best_hidden_center_distance_spearman"] = float(best_corr)
             out[f"mean_hidden_adjacent_jump_layer_{best_layer}"] = layer_corrs[best_layer]["mean_adjacent_jump"]
             out["mean_hidden_adjacent_jump_best_layer"] = layer_corrs[best_layer]["mean_adjacent_jump"]
+            rb = representation_boundary_block(hidden_by_layer[best_layer], center_index)
+            for k, v in rb.items():
+                out[f"hidden_{k}"] = v
 
     if attention_maps is not None and len(attention_maps) >= 2:
         ab = attention_block(attention_maps, frame_indices, center_index)
@@ -89,5 +99,27 @@ def aggregate_sequence(frame_records,
         if 0 <= center_index < len(margins_arr):
             out["center_abs_margin"] = float(abs(margins_arr[center_index]))
         out["mean_abs_margin"] = float(np.mean(np.abs(margins_arr)))
+
+        if 0 <= center_index < len(margins_arr):
+            abs_margins = [abs(m) for m in margins_arr]
+            center_val = abs_margins[center_index]
+            cds = [abs(v - center_val) for v in abs_margins]
+            margin_indices = [r["frame_index"] for r, m in zip(frame_records, margins) if m is not None]
+            out["yes_no_margin_center_distance_spearman"] = ambiguity_spearman(
+                cds, margin_indices, center_index
+            )
+
+    bin_ents = [r.get("binary_entropy") for r in frame_records]
+    bin_ents_arr = [(r["frame_index"], h) for r, h in zip(frame_records, bin_ents) if h is not None]
+    if bin_ents_arr and 0 <= center_index < len(frame_records):
+        bh_indices = [fi for fi, _ in bin_ents_arr]
+        bh_vals = [h for _, h in bin_ents_arr]
+        center_pos = next((i for i, fi in enumerate(bh_indices) if fi == center_index), None)
+        if center_pos is not None:
+            center_val = bh_vals[center_pos]
+            cds = [abs(v - center_val) for v in bh_vals]
+            out["binary_entropy_center_distance_spearman"] = ambiguity_spearman(
+                cds, bh_indices, center_index
+            )
 
     return out
