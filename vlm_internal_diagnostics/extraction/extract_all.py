@@ -6,13 +6,9 @@ import numpy as np
 import torch
 from PIL import Image
 
-from ..models.llava_loader import load_llava, build_prompt
-from ..models.token_index_utils import get_token_indices, infer_grid_shape
-from ..models.hook_utils import capture_vision_and_projector
-from .extract_vision_features import pool_vision_features
-from .extract_projector_features import pool_projector_features
 from .extract_hidden_states import collect_hidden_states, hidden_state_norms
 from .extract_attentions import slice_query_to_image
+from .extract_per_token_attention import extract_per_token_attention
 from .extract_logits import compute_yes_no_logits
 from ..metrics.attention_metrics import attention_entropy
 
@@ -31,7 +27,7 @@ def _save_tensor(t, path, dtype=torch.float16):
     return path
 
 
-def extract_all(model, processor, sequences, configs, output_dir):
+def extract_all(model, processor, sequences, configs, output_dir, adapter=None):
     """Run extraction for all sequences. Writes per_frame_outputs.jsonl.
 
     sequences: iterable of list-of-frame-records.
@@ -41,6 +37,10 @@ def extract_all(model, processor, sequences, configs, output_dir):
     model_cfg = configs["model"]
     run_cfg = configs["run"]
     prompt_cfg = model_cfg["prompt"]
+
+    if adapter is None:
+        from ..models.adapters import get_adapter
+        adapter = get_adapter(model_cfg.get("family", "llava"))
 
     save_dtype = _TORCH_DTYPE.get(extraction_cfg.get("storage", {}).get("tensor_dtype", "float16"),
                                   torch.float16)
@@ -77,14 +77,15 @@ def extract_all(model, processor, sequences, configs, output_dir):
                     print(f"[warn] missing image: {rec['image_path']}")
                     continue
 
-                prompt = build_prompt(processor, rec["question"], prompt_cfg)
-                token_meta = get_token_indices(processor, model, image, rec["question"], prompt)
+                image = adapter.preprocess_image(image)
+                prompt = adapter.build_prompt(processor, rec["question"], prompt_cfg)
+                token_meta = adapter.get_token_indices(processor, model, image, rec["question"], prompt)
 
                 inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
-                if inputs["pixel_values"].dtype != next(model.parameters()).dtype:
+                if "pixel_values" in inputs and inputs["pixel_values"].dtype != next(model.parameters()).dtype:
                     inputs["pixel_values"] = inputs["pixel_values"].to(next(model.parameters()).dtype)
 
-                with torch.no_grad(), capture_vision_and_projector(model) as hooks:
+                with torch.no_grad(), adapter.capture_vision_and_projector(model) as hooks:
                     outputs = model(
                         **inputs,
                         output_hidden_states=True,
@@ -92,9 +93,9 @@ def extract_all(model, processor, sequences, configs, output_dir):
                         return_dict=True,
                     )
 
-                vision_pooled = pool_vision_features(hooks["vision"]) \
+                vision_pooled = adapter.pool_vision_features(hooks["vision"]) \
                     if extraction_cfg.get("save_vision_features", True) else None
-                projector_pooled = pool_projector_features(hooks["projector"]) \
+                projector_pooled = adapter.pool_projector_features(hooks["projector"]) \
                     if extraction_cfg.get("save_projector_features", True) else None
 
                 # Hidden states
@@ -113,6 +114,18 @@ def extract_all(model, processor, sequences, configs, output_dir):
                     )
                 attn_entropies = {f"layer_{l}_{attn_cfg.get('query_source','final_prompt')}":
                                   float(attention_entropy(v)) for l, v in per_layer_attn.items()}
+
+                # Per-token attention (full T x P matrix per layer + per-head stats)
+                per_token_pkg = None
+                if (extraction_cfg.get("save_attentions", True)
+                        and attn_cfg.get("save_per_token_attention", True)):
+                    per_token_pkg = extract_per_token_attention(
+                        outputs, token_meta,
+                        layers=tuple(attn_cfg.get("per_token_layers",
+                                                  attn_cfg.get("layers", [8, 16, 24, 31]))),
+                        head_aggregation=attn_cfg.get("per_token_head_aggregation",
+                                                      attn_cfg.get("aggregate_heads", "mean")),
+                    )
 
                 # Logits
                 logit_info = None
@@ -138,6 +151,30 @@ def extract_all(model, processor, sequences, configs, output_dir):
                         feat_paths["attention_map"] = str(_save_tensor(
                             {int(l): torch.tensor(v) for l, v in per_layer_attn.items()},
                             seq_feat_dir / f"{stem}_attention.pt", save_dtype))
+                    if per_token_pkg is not None:
+                        # Decode question tokens to strings using the LLaVA tokenizer
+                        q_lm_idx = per_token_pkg["question_token_indices_used"]
+                        full_input_ids = token_meta["input_ids"].tolist()
+                        q_token_ids = [full_input_ids[i] for i in q_lm_idx]
+                        q_token_strs = tokenizer.convert_ids_to_tokens(q_token_ids)
+                        per_token_payload = {
+                            "per_layer_matrices_head_avg": {
+                                int(l): torch.tensor(m)
+                                for l, m in per_token_pkg["per_layer_matrices_head_avg"].items()
+                            },
+                            "per_head_stats": {
+                                k: torch.tensor(v) for k, v in per_token_pkg["per_head_stats"].items()
+                            },
+                            "layers": per_token_pkg["layers"],
+                            "num_heads": per_token_pkg["num_heads"],
+                            "num_question_tokens": per_token_pkg["num_question_tokens"],
+                            "num_image_patches": per_token_pkg["num_image_patches"],
+                            "question_token_indices_lm": q_lm_idx,
+                            "question_tokens": q_token_strs,
+                        }
+                        feat_paths["per_token_attention_map"] = str(_save_tensor(
+                            per_token_payload,
+                            seq_feat_dir / f"{stem}_per_token_attention.pt", save_dtype))
                     if logit_info is not None:
                         feat_paths["logits"] = str(_save_tensor(
                             outputs.logits[0, token_meta["final_prompt_token_index"]].detach().cpu(),
