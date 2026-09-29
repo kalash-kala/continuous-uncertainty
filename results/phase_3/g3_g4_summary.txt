@@ -1,0 +1,129 @@
+PHASE 3: G3 / G4 / G3+G4 vs BASELINES
+======================================================================
+
+Total sequences (rows): 368
+Models: ['llava', 'phi4', 'pixtral', 'qwen']
+
+──────────────────────────────────────────────────────────────────────
+Model: llava  (92 sequences)
+──────────────────────────────────────────────────────────────────────
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision       2.64±1.78   1.75±1.32   2.07±1.29   2.25±1.41   1.73±1.34   1.84±1.29   3.22±1.71   1.93±1.34
+projector    2.64±1.78   1.99±1.25   2.02±1.27   2.17±1.40   1.78±1.32   1.75±1.25   3.30±1.64   1.91±1.32
+hidden       2.64±1.78   1.72±1.26   2.41±1.32   2.46±1.35   1.80±1.34   2.12±1.33   3.49±1.54   2.17±1.36
+
+Exact match counts (boundary_error == 0):
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision         14/  92     19/  92     10/  92     11/  92     20/  92     14/  92      8/  92     13/  92
+projector      14/  92     10/  92     10/  92     14/  92     17/  92     15/  92      7/  92     14/  92
+hidden         14/  92     19/  92      6/  92      9/  92     20/  92     14/  92      6/  92     15/  92
+
+──────────────────────────────────────────────────────────────────────
+Model: phi4  (92 sequences)
+──────────────────────────────────────────────────────────────────────
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision       2.20±1.59   1.72±1.20   2.04±1.26   2.18±1.44   1.72±1.15   1.67±1.26   3.32±1.63   1.80±1.26
+projector    2.20±1.59   1.63±1.13   1.96±1.35   2.22±1.37   1.63±1.18   1.51±1.18   3.38±1.66   1.84±1.30
+hidden       2.20±1.59   1.79±1.41   2.27±1.35   2.40±1.46   1.79±1.44   1.93±1.50   3.25±1.90   1.89±1.51
+
+Exact match counts (boundary_error == 0):
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision         12/  92     13/  92      7/  92     15/  92     13/  92     16/  92      2/  92     14/  92
+projector      12/  92     15/  92     11/  92      9/  92     18/  92     18/  92      6/  92     12/  92
+hidden         12/  92     19/  92     12/  92     12/  92     21/  92     20/  92     11/  92     22/  92
+
+──────────────────────────────────────────────────────────────────────
+Model: pixtral  (92 sequences)
+──────────────────────────────────────────────────────────────────────
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision       2.53±1.64   1.90±1.22   2.07±1.37   2.35±1.28   1.87±1.18   1.91±1.26   3.12±1.59   1.88±1.21
+projector    2.53±1.64   1.88±1.26   2.17±1.30   2.03±1.39   1.88±1.27   1.84±1.28   3.27±1.49   1.92±1.34
+hidden       2.53±1.64   2.01±1.49   2.33±1.29   2.63±1.43   2.07±1.45   2.10±1.45   3.36±1.58   2.20±1.45
+
+Exact match counts (boundary_error == 0):
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision         10/  92      9/  92     11/  92      5/  92     11/  92     10/  92      5/  92     10/  92
+projector      10/  92     14/  92     11/  92     15/  92     13/  92     16/  92      4/  92     16/  92
+hidden         10/  92     18/  92      6/  92      8/  92     15/  92     15/  92      7/  92     14/  92
+
+──────────────────────────────────────────────────────────────────────
+Model: qwen  (92 sequences)
+──────────────────────────────────────────────────────────────────────
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision       2.53±1.71   2.02±1.14   2.11±1.22   2.24±1.36   1.96±1.27   1.70±1.25   3.27±1.56   2.00±1.33
+projector    2.53±1.71   1.74±1.28   2.40±1.26   2.39±1.33   1.78±1.33   1.73±1.35   3.17±1.61   2.05±1.35
+hidden       2.53±1.71   2.23±1.50   2.28±1.29   2.61±1.29   2.21±1.46   2.23±1.50   3.07±1.62   2.35±1.46
+
+Exact match counts (boundary_error == 0):
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision         13/  92      9/  92      9/  92     11/  92     11/  92     18/  92      3/  92     15/  92
+projector      13/  92     15/  92      6/  92      8/  92     15/  92     21/  92      4/  92     14/  92
+hidden         13/  92     12/  92      9/  92      6/  92     12/  92     12/  92      5/  92     10/  92
+
+======================================================================
+ALL MODELS POOLED — mean BE ± std
+======================================================================
+stage            logit       chord       angle   local_varanchor_product          g3          g4        g3g4
+vision       2.48±1.69   1.85±1.23   2.07±1.29   2.26±1.38   1.82±1.24   1.78±1.27   3.23±1.63   1.90±1.29
+projector    2.48±1.69   1.81±1.24   2.14±1.31   2.20±1.38   1.77±1.28   1.71±1.27   3.28±1.60   1.93±1.33
+hidden       2.48±1.69   1.94±1.43   2.32±1.32   2.52±1.39   1.97±1.43   2.10±1.45   3.29±1.67   2.15±1.46
+
+======================================================================
+WILCOXON SIGNED-RANK (paired) — boundary error vs chord baseline
+(negative median diff means new method has LOWER error → better)
+======================================================================
+
+Stage: vision
+     g3 vs chord:  median Δ=+0.00  mean Δ=-0.068  p=0.2236  n=368
+     g4 vs chord:  median Δ=+1.00  mean Δ=+1.383  p=2.365e-32  n=368
+   g3g4 vs chord:  median Δ=+0.00  mean Δ=+0.057  p=0.5412  n=368
+
+Stage: projector
+     g3 vs chord:  median Δ=+0.00  mean Δ=-0.103  p=0.1161  n=368
+     g4 vs chord:  median Δ=+1.00  mean Δ=+1.473  p=2.382e-35  n=368
+   g3g4 vs chord:  median Δ=+0.00  mean Δ=+0.122  p=0.03795  n=368
+
+Stage: hidden
+     g3 vs chord:  median Δ=+0.00  mean Δ=+0.158  p=0.00726  n=368
+     g4 vs chord:  median Δ=+1.00  mean Δ=+1.353  p=1.467e-30  n=368
+   g3g4 vs chord:  median Δ=+0.00  mean Δ=+0.215  p=0.0003458  n=368
+
+======================================================================
+PER-MODEL: G3+G4 vs chord (boundary error)
+======================================================================
+
+Model: llava
+  vision     median Δ=+0.00  mean Δ=+0.185  p=0.09692
+  projector  median Δ=+0.00  mean Δ=-0.076  p=0.8638
+  hidden     median Δ=+0.00  mean Δ=+0.457  p=0.0002533
+
+Model: phi4
+  vision     median Δ=+0.00  mean Δ=+0.087  p=0.6539
+  projector  median Δ=+0.00  mean Δ=+0.207  p=0.1767
+  hidden     median Δ=+0.00  mean Δ=+0.098  p=0.416
+
+Model: pixtral
+  vision     median Δ=+0.00  mean Δ=-0.022  p=0.6006
+  projector  median Δ=+0.00  mean Δ=+0.043  p=0.7439
+  hidden     median Δ=+0.00  mean Δ=+0.185  p=0.1063
+
+Model: qwen
+  vision     median Δ=+0.00  mean Δ=-0.022  p=0.8261
+  projector  median Δ=+0.00  mean Δ=+0.315  p=0.005655
+  hidden     median Δ=+0.00  mean Δ=+0.120  p=0.2571
+
+======================================================================
+G3 DIAGNOSTICS
+======================================================================
+
+Stage: vision
+  k_used distribution: {4: 368}
+  isomap fallback rate: 0.0%
+
+Stage: projector
+  k_used distribution: {4: 368}
+  isomap fallback rate: 0.0%
+
+Stage: hidden
+  k_used distribution: {4: 368}
+  isomap fallback rate: 0.0%

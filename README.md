@@ -123,6 +123,11 @@ distance matrix.
 
 ## 3. Results
 
+The exact outputs behind every number below are committed under
+[`results/`](results/) (~1.4 MB), including per-sequence CSVs and checksums, so
+you can check the claims or verify a re-run without reproducing the 7 GB of
+extraction first. See [`results/README.md`](results/README.md).
+
 ### 3.1 Phase 1 & 2 — the orthogonal-structure hypothesis
 
 `Representation_geometry_analysis_framework.py`, `scripts/phase_1_2_analysis.py`
@@ -319,6 +324,16 @@ Outputs live under whatever you set as `outputs_root` (on the lab server:
 phase_1_2/   phase1_phase2_results.csv, summary_stats.txt, validation_report.txt
 phase_3/     g3_g4_results.csv, g3_g4_with_baselines.csv, g3_g4_summary.txt
 phase_4/     uncertainty_auroc.csv, uncertainty_auroc_frames.csv, summary.txt
+```
+
+A snapshot of those result files (minus the large per-frame CSV and the
+tensors) is committed in the repo itself:
+
+```
+results/
+  aggregate_metrics/{llava,phi4,pixtral,qwen2_5_vl}.csv   extraction output, 92 rows each
+  phase_1_2/  phase_3/  phase_4/                          analysis outputs + figures
+  README.md                                               what each file is + replication diffs
 ```
 
 > ⚠️ **Superseded run directories on the lab server.** Three LLaVA variants

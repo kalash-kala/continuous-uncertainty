@@ -1,0 +1,199 @@
+PHASE 1 & 2 VALIDATION SUMMARY
+==============================
+
+Dataset: 92 sequences, 4 models, 3 stages each = 1104 total tests
+
+═══ STAGE: VISION ══════════════════════════════════════════════════════
+
+Test 1: PCA Alignment with Decision Axis
+  PC1 alignment > 0.7:              264/368 (71.7%)
+  Monotonicity violations ≤ 1:      17/368 (4.6%)
+  PC1 variance ratio > 0.5:         160/368 (43.5%)
+  → Sequences passing ALL:          8/368 (2.2%) ✗
+
+  Mean PC1 alignment: 0.756 ± 0.246
+  Mean PC1 variance ratio: 0.572 ± 0.260
+  Mean monotonicity violations: 3.28 ± 0.87
+
+Test 2: Orthogonal Variance Peak at Center
+  Decision axis monotonic:          13/368 (3.5%)
+  Orthogonal variance Spearman < -0.5: 114/368 (31.0%)
+  Peak at correct frame:            130/368 (35.3%)
+  → Sequences passing ALL:          77/368 (20.9%) ✗
+
+  Mean orthogonal variance center Spearman: -0.283 ± 0.354
+
+Test 3: Frame Order Recovery
+  LIS ratio > 0.5:                  305/368 (82.9%)
+  LIS ratio > 0.7:                  153/368 (41.6%)
+  → Sequences passing (>0.5):       305/368 (82.9%) ✓
+
+  Mean LIS ratio: 0.704 ± 0.166
+  Perfect matches (LIS=1.0):        28/368 (7.6%)
+
+Test 4: Trajectory Curvature
+  Mean curvature > 0.15 rad:        368/368 (100.0%)
+  Curvature peaks near center:      188/368 (51.1%)
+  Spearman < -0.3:                  66/368 (17.9%)
+  → Sequences passing ALL:          193/368 (52.4%) ?
+
+  Mean curvature: 1.931 ± 0.242 radians (~111°)
+  Max curvature: 2.443 ± 0.389 radians (~140°)
+
+Test 5: Effective Dimensionality
+  Compression ratio > 10x:          368/368 (100.0%)
+  Effective dim < 50:               368/368 (100.0%)
+  → Sequences passing ALL:          368/368 (100.0%) ✓
+
+  Mean compression ratio: 465.7x ± 472.7x
+  Mean effective dim (95% var): 5.8 ± 2.8
+  Median effective dim: 7
+
+═══ STAGE: PROJECTOR ═══════════════════════════════════════════════════
+
+Test 1: PCA Alignment with Decision Axis
+  PC1 alignment > 0.7:              226/368 (61.4%)
+  Monotonicity violations ≤ 1:      19/368 (5.2%)
+  PC1 variance ratio > 0.5:         153/368 (41.6%)
+  → Sequences passing ALL:          8/368 (2.2%) ✗
+
+  Mean PC1 alignment: 0.697 ± 0.252
+  Mean PC1 variance ratio: 0.502 ± 0.182
+  Mean monotonicity violations: 3.28 ± 0.86
+
+Test 2: Orthogonal Variance Peak at Center
+  Decision axis monotonic:          12/368 (3.3%)
+  Orthogonal variance Spearman < -0.5: 114/368 (31.0%)
+  Peak at correct frame:            123/368 (33.4%)
+  → Sequences passing ALL:          75/368 (20.4%) ✗
+
+  Mean orthogonal variance center Spearman: -0.297 ± 0.359
+
+Test 3: Frame Order Recovery
+  LIS ratio > 0.5:                  283/368 (76.9%)
+  LIS ratio > 0.7:                  137/368 (37.2%)
+  → Sequences passing (>0.5):       283/368 (76.9%) ✓
+
+  Mean LIS ratio: 0.690 ± 0.172
+  Perfect matches (LIS=1.0):        24/368 (6.5%)
+
+Test 4: Trajectory Curvature
+  Mean curvature > 0.15 rad:        368/368 (100.0%)
+  Curvature peaks near center:      171/368 (46.5%)
+  Spearman < -0.3:                  69/368 (18.8%)
+  → Sequences passing ALL:          181/368 (49.2%) ✗
+
+  Mean curvature: 1.932 ± 0.122 radians (~111°)
+  Max curvature: 2.341 ± 0.236 radians (~134°)
+
+Test 5: Effective Dimensionality
+  Compression ratio > 10x:          368/368 (100.0%)
+  Effective dim < 50:               368/368 (100.0%)
+  → Sequences passing ALL:          368/368 (100.0%) ✓
+
+  Mean compression ratio: 698.1x ± 590.6x
+  Mean effective dim (95% var): 6.8 ± 1.5
+  Median effective dim: 7
+
+═══ STAGE: HIDDEN (BEST LAYER) ═════════════════════════════════════════
+
+Test 1: PCA Alignment with Decision Axis
+  PC1 alignment > 0.7:              212/368 (57.6%)
+  Monotonicity violations ≤ 1:      18/368 (4.9%)
+  PC1 variance ratio > 0.5:         151/368 (41.0%)
+  → Sequences passing ALL:          11/368 (3.0%) ✗
+
+  Mean PC1 alignment: 0.680 ± 0.271
+  Mean PC1 variance ratio: 0.491 ± 0.137
+  Mean monotonicity violations: 3.30 ± 0.89
+
+Test 2: Orthogonal Variance Peak at Center
+  Decision axis monotonic:          6/368 (1.6%)
+  Orthogonal variance Spearman < -0.5: 90/368 (24.5%)
+  Peak at correct frame:            115/368 (31.2%)
+  → Sequences passing ALL:          62/368 (16.8%) ✗
+
+  Mean orthogonal variance center Spearman: -0.212 ± 0.376
+
+Test 3: Frame Order Recovery
+  LIS ratio > 0.5:                  261/368 (70.9%)
+  LIS ratio > 0.7:                  100/368 (27.2%)
+  → Sequences passing (>0.5):       261/368 (70.9%) ✓
+
+  Mean LIS ratio: 0.646 ± 0.161
+  Perfect matches (LIS=1.0):        9/368 (2.4%)
+
+Test 4: Trajectory Curvature
+  Mean curvature > 0.15 rad:        368/368 (100.0%)
+  Curvature peaks near center:      154/368 (41.8%)
+  Spearman < -0.3:                  67/368 (18.2%)
+  → Sequences passing ALL:          166/368 (45.1%) ✗
+
+  Mean curvature: 1.954 ± 0.124 radians (~112°)
+  Max curvature: 2.392 ± 0.203 radians (~137°)
+
+Test 5: Effective Dimensionality
+  Compression ratio > 10x:          368/368 (100.0%)
+  Effective dim < 50:               368/368 (100.0%)
+  → Sequences passing ALL:          368/368 (100.0%) ✓
+
+  Mean compression ratio: 620.9x ± 193.1x
+  Mean effective dim (95% var): 6.6 ± 1.1
+  Median effective dim: 7
+
+======================================================================
+CROSS-MODEL COMPARISON
+======================================================================
+
+Model: llava
+  Test 1 pass rate (all stages):    5.8% ✗
+  Test 2 pass rate (all stages):    21.7% ✗
+  Test 3 pass rate (all stages):    84.8% ✓
+  Test 4 pass rate (all stages):    49.3% ✗
+  Test 5 pass rate (all stages):    100.0% ✓
+
+Model: phi4
+  Test 1 pass rate (all stages):    2.2% ✗
+  Test 2 pass rate (all stages):    24.3% ✗
+  Test 3 pass rate (all stages):    77.9% ✓
+  Test 4 pass rate (all stages):    52.5% ?
+  Test 5 pass rate (all stages):    100.0% ✓
+
+Model: pixtral
+  Test 1 pass rate (all stages):    0.7% ✗
+  Test 2 pass rate (all stages):    14.1% ✗
+  Test 3 pass rate (all stages):    71.4% ✓
+  Test 4 pass rate (all stages):    50.4% ?
+  Test 5 pass rate (all stages):    100.0% ✓
+
+Model: qwen
+  Test 1 pass rate (all stages):    1.1% ✗
+  Test 2 pass rate (all stages):    17.4% ✗
+  Test 3 pass rate (all stages):    73.6% ✓
+  Test 4 pass rate (all stages):    43.5% ✗
+  Test 5 pass rate (all stages):    100.0% ✓
+
+======================================================================
+BREAKDOWN BY CATEGORY
+======================================================================
+
+Category: COMPOSITIONAL (12 sequences, all stages = 144 tests)
+  Test 1 pass rate: 5.6% ✗
+  Test 2 pass rate: 24.3% ✗
+  Test 3 pass rate: 75.0% ✓
+  Test 4 pass rate: 43.8% ✗
+  Test 5 pass rate: 100.0% ✓
+
+Category: GEOMETRIC (35 sequences, all stages = 420 tests)
+  Test 1 pass rate: 1.4% ✗
+  Test 2 pass rate: 23.3% ✗
+  Test 3 pass rate: 76.0% ✓
+  Test 4 pass rate: 51.7% ?
+  Test 5 pass rate: 100.0% ✓
+
+Category: SEMANTIC (45 sequences, all stages = 540 tests)
+  Test 1 pass rate: 2.4% ✗
+  Test 2 pass rate: 15.0% ✗
+  Test 3 pass rate: 78.1% ✓
+  Test 4 pass rate: 48.1% ✗
+  Test 5 pass rate: 100.0% ✓
